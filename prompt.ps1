@@ -11,23 +11,23 @@ function prompt {
     
         .NOTES
         TODO: Research incorporating StringBuilder for performance optimization in string concatenation
-        # Create a StringBuilder object
-        $prompt = New-Object -TypeName System.Text.StringBuilder
+            # Create a StringBuilder object
+            $prompt = New-Object -TypeName System.Text.StringBuilder
 
-        # Append text to the StringBuilder
-        for ($i = 1; $i -le 100000; $i++) {
-            $stringBuilder.Append("This is line $i`n") | Out-Null
-        }
+            # Append text to the StringBuilder
+            for ($i = 1; $i -le 100000; $i++) {
+                $stringBuilder.Append("This is line $i`n") | Out-Null
+            }
 
-        # Convert the StringBuilder content to a single string and output it
-        $output = $stringBuilder.ToString()
-        Write-Output $output
+            # Convert the StringBuilder content to a single string and output it
+            $output = $stringBuilder.ToString()
+            Write-Output $output
     #>
     <#
     #  Gather information for the prompt
     #>
     if ($null -eq $Script:OriginalScriptBlock) {
-        # "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) 1"
+        #$defaultPrompt = "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) 1"S
         [ScriptBlock]$Script:OriginalScriptBlock = (Get-Command prompt).ScriptBlock
     }
     # color definitions
@@ -62,6 +62,9 @@ function prompt {
         $colorSetting.accentColor = $userColors.admin.accent
         $colorSetting.alternateColor = $userColors.admin.alternate
     }
+    # Get the current directory, format the title path, and adjust location color; based whether path is remote, home, or local directory.
+    $Path = Get-Location
+    $currentDir = Split-Path -Path $Path -Leaf
     # Resize-Path function to shorten long path strings
     function Resize-Path {
         param ( [string]$path = $((Get-Location).path),  [int]$maxLength = 50 )
@@ -74,21 +77,18 @@ function prompt {
             $remotePrefix = '\\'
         }
         if ($path.Length -gt $maxLength) {
-                $pathSplit = $path -split '\\'
-                $newPath = "$remotePrefix$($pathSplit[$rootIndex])"
-                $pathSplit[($rootIndex + 1)..$($pathSplit.Length - 1)] | ForEach-Object {
-                    if ((@($newPath, $_, '...', $currentDir) -join '\').length -le $maxLength) {
-                        $newPath += "\$_"
-                    } elseif ((@($newPath, '...', $currentDir) -join '\').length -le $maxLength) {
-                        $path = @($newPath, '...', $currentDir) -join '\'
-                    }
+            $pathSplit = $path -split '\\'
+            $newPath = "$remotePrefix$($pathSplit[$rootIndex])"
+            $pathSplit[($rootIndex + 1)..$($pathSplit.Length - 1)] | ForEach-Object {
+                if ((@($newPath, $_, '...', $currentDir) -join '\').length -le $maxLength) {
+                    $newPath += "\$_"
+                } elseif ((@($newPath, '...', $currentDir) -join '\').length -le $maxLength) {
+                    $path = @($newPath, '...', $currentDir) -join '\'
                 }
             }
+        }
         return $path
     }
-    # Get the current directory, format the title path, and adjust location color; based whether path is remote, home, or local directory.
-    $Path = Get-Location
-    $currentDir = Split-Path -Path $Path -Leaf
     switch ($Path) {
         {$_.Path.StartsWith('Microsoft.PowerShell.Core\FileSystem::')} { # remote filesystem
             $titlePath = resize-path "$($_.Path)"
