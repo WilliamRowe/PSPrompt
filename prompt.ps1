@@ -81,9 +81,9 @@ function prompt {
             $newPath = "$remotePrefix$($pathSplit[$rootIndex])"
             $pathSplit[($rootIndex + 1)..$($pathSplit.Length - 1)] | ForEach-Object {
                 if ((@($newPath, $_, '...', $currentDir) -join '\').length -le $maxLength) {
-                    $newPath += "\$_"
+                    $newPath += "\$_"; continue;
                 } elseif ((@($newPath, '...', $currentDir) -join '\').length -le $maxLength) {
-                    $path = @($newPath, '...', $currentDir) -join '\'
+                    $path = @($newPath, '...', $currentDir) -join '\'; break;
                 }
             }
         }
