@@ -62,7 +62,7 @@ function prompt {
         $colorSetting.accentColor = $userColors.admin.accent
         $colorSetting.alternateColor = $userColors.admin.alternate
     }
-    # Get the current directory, format the title path, and adjust location color; based whether path is remote, home, or local directory.
+    # Resize-Path function to shorten long path strings
     function Resize-Path {
         param ( [string]$path = $((Get-Location).path),  [int]$maxLength = 50 )
         $currentDir = Split-Path -Path $path -Leaf
@@ -86,6 +86,7 @@ function prompt {
             }
         return $path
     }
+    # Get the current directory, format the title path, and adjust location color; based whether path is remote, home, or local directory.
     $Path = Get-Location
     $currentDir = Split-Path -Path $Path -Leaf
     switch ($Path) {
